@@ -1,2 +1,3 @@
-# Example
-An example greeter plugin
+# Chugging Barrel
+
+Adds loadout names to the chugging barrel.
