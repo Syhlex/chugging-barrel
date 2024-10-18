@@ -162,7 +162,7 @@ public class ChuggingBarrelPlugin extends Plugin {
         String defaultLoadoutName = "Loadout " + (index + 1);
         String savedLoadoutName = configManager.getConfiguration(ChuggingBarrelConfig.GROUP, String.valueOf(index));
 
-        Widget textWidget = loadoutContainer.createChild(WidgetType.TEXT);
+        Widget textWidget = loadoutContainer.createChild(1, WidgetType.TEXT);
 
         textWidget.setText(savedLoadoutName != null ? savedLoadoutName : defaultLoadoutName);
         textWidget.setFontId(FontID.BOLD_12);
