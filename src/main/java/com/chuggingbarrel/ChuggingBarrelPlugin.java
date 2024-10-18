@@ -180,12 +180,15 @@ public class ChuggingBarrelPlugin extends Plugin {
             chatboxPanelManager.openTextInput("Loadout name: ")
                 .value(Strings.nullToEmpty(oldLoadoutName))
                 .onDone((value) -> {
-                    String newLoadoutName = value.trim();
-                    if (newLoadoutName.isEmpty()) {
-                        newLoadoutName = defaultLoadoutName;
-                    }
-                    configManager.setConfiguration(ChuggingBarrelConfig.GROUP, String.valueOf(index), newLoadoutName);
-                    textWidget.setText(newLoadoutName);
+                    clientThread.invokeLater(() -> {
+                        String newLoadoutName = value.trim();
+                        if (newLoadoutName.isEmpty()) {
+                            newLoadoutName = defaultLoadoutName;
+                        }
+                        configManager.setConfiguration(ChuggingBarrelConfig.GROUP, String.valueOf(index), newLoadoutName);
+                        textWidget.setText(newLoadoutName);
+                        textWidget.revalidate();
+                    });
                 })
                 .build();
         });
