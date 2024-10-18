@@ -82,7 +82,6 @@ public class ChuggingBarrelPlugin extends Plugin {
     }
 
     private void setupChuggingBarrelInterface() {
-        log.info("Setting up");
         updateLoadout(LOADOUT_CONTAINER_IDS[0], POTION_CONTAINER_IDS[0], LOAD_BUTTON_IDS[0], 0, 0);
         updateLoadout(LOADOUT_CONTAINER_IDS[1], POTION_CONTAINER_IDS[1], LOAD_BUTTON_IDS[1], 20, 1);
         updateLoadout(LOADOUT_CONTAINER_IDS[2], POTION_CONTAINER_IDS[2], LOAD_BUTTON_IDS[2], 40, 2);
@@ -91,7 +90,6 @@ public class ChuggingBarrelPlugin extends Plugin {
     }
 
     private void resetChuggingBarrelInterface() {
-        log.info("Resetting");
         resetLoadout(LOADOUT_CONTAINER_IDS[0], POTION_CONTAINER_IDS[0], LOAD_BUTTON_IDS[0], 0);
         resetLoadout(LOADOUT_CONTAINER_IDS[1], POTION_CONTAINER_IDS[1], LOAD_BUTTON_IDS[1], 1);
         resetLoadout(LOADOUT_CONTAINER_IDS[2], POTION_CONTAINER_IDS[2], LOAD_BUTTON_IDS[2], 2);
