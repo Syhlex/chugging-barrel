@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.FontID;
 import net.runelite.api.ScriptID;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.widgets.*;
 import net.runelite.client.callback.ClientThread;
@@ -17,6 +18,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
@@ -38,21 +40,14 @@ public class ChuggingBarrelPlugin extends Plugin {
     @Inject
     private ChatboxPanelManager chatboxPanelManager;
 
-    private final int LOADOUTS_SCROLLBAR_ID = 983092;
-    private final int LOADOUTS_SCROLL_CONTAINER_ID = 983093;
+    @Inject
+    private OverlayManager overlayManager;
 
-    private final int[] LOADOUT_CONTAINER_IDS = {983094, 983095, 983096, 983097};
-    private final int[] POTION_CONTAINER_IDS = {983109, 983100, 983103, 983106};
-    private final int[] LOAD_BUTTON_IDS = {983107, 983098, 983101, 983104};
+    @Inject
+    private ChuggingBarrelItemOverlay chuggingBarrelItemOverlay;
 
-    private final int CHUGGING_BARREL_VARBIT_ID = 9727; // Same as the rune pouch
-    private final int CHUGGING_BARREL_VARBIT_VALUE_ON = 5;
-    private final int CHUGGING_BARREL_VARBIT_VALUE_OFF = 0;
-
-    private final int TITLE_WIDGET_HEIGHT = 20;
-
-    private final int[] loadoutContainerOriginalY = new int[LOADOUT_CONTAINER_IDS.length];
-    private final int[] loadoutContainerOriginalHeight = new int[LOADOUT_CONTAINER_IDS.length];
+    private final int[] loadoutContainerOriginalY = new int[ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS.length];
+    private final int[] loadoutContainerOriginalHeight = new int[ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS.length];
 
     @Provides
     ChuggingBarrelConfig provideConfig(ConfigManager configManager) {
@@ -61,40 +56,69 @@ public class ChuggingBarrelPlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
+        overlayManager.add(chuggingBarrelItemOverlay);
         clientThread.invokeLater(this::setupChuggingBarrelInterface);
     }
 
     @Override
     protected void shutDown() throws Exception {
+        overlayManager.remove(chuggingBarrelItemOverlay);
         clientThread.invokeLater(this::resetChuggingBarrelInterface);
     }
 
     @Subscribe
     public void onVarbitChanged(VarbitChanged varbitChanged) {
-        if (varbitChanged.getVarbitId() != CHUGGING_BARREL_VARBIT_ID) {
+        if (varbitChanged.getVarbitId() != ChuggingBarrelConstants.CHUGGING_BARREL_VARBIT_ID) {
             return;
         }
 
-        if (varbitChanged.getValue() == CHUGGING_BARREL_VARBIT_VALUE_ON) {
+        if (varbitChanged.getValue() == ChuggingBarrelConstants.CHUGGING_BARREL_VARBIT_VALUE_ON) {
             clientThread.invokeLater(this::setupChuggingBarrelInterface);
-        } else if (varbitChanged.getValue() == CHUGGING_BARREL_VARBIT_VALUE_OFF) {
+        } else if (varbitChanged.getValue() == ChuggingBarrelConstants.CHUGGING_BARREL_VARBIT_VALUE_OFF) {
             clientThread.invokeLater(this::resetChuggingBarrelInterface);
         }
     }
 
+    @Subscribe
+    public void onMenuOptionClicked(MenuOptionClicked event) {
+        Widget widget = event.getWidget();
+
+        if (widget == null) {
+            return;
+        }
+
+        for (int i = 0; i < ChuggingBarrelConstants.LOAD_BUTTON_IDS.length; i++) {
+            if (widget.getId() == ChuggingBarrelConstants.LOAD_BUTTON_IDS[i]) {
+                configManager.setConfiguration(ChuggingBarrelConfig.GROUP, ChuggingBarrelConfig.SELECTED_LOADOUT_INDEX, i);
+                return;
+            }
+        }
+
+        if (widget.getId() == ChuggingBarrelConstants.DEPOSIT_POTIONS_ID) {
+            configManager.unsetConfiguration(ChuggingBarrelConfig.GROUP, ChuggingBarrelConfig.SELECTED_LOADOUT_INDEX);
+        }
+    }
+
+    public String getSelectedLoadoutName() {
+        String selectedLoadoutIndex = configManager.getConfiguration(ChuggingBarrelConfig.GROUP, ChuggingBarrelConfig.SELECTED_LOADOUT_INDEX);
+        return configManager.getConfiguration(ChuggingBarrelConfig.GROUP, selectedLoadoutIndex);
+    }
+
     private void setupChuggingBarrelInterface() {
-        updateLoadout(LOADOUT_CONTAINER_IDS[0], POTION_CONTAINER_IDS[0], LOAD_BUTTON_IDS[0], 0, 0);
-        updateLoadout(LOADOUT_CONTAINER_IDS[1], POTION_CONTAINER_IDS[1], LOAD_BUTTON_IDS[1], 20, 1);
-        updateLoadout(LOADOUT_CONTAINER_IDS[2], POTION_CONTAINER_IDS[2], LOAD_BUTTON_IDS[2], 40, 2);
-        updateLoadout(LOADOUT_CONTAINER_IDS[3], POTION_CONTAINER_IDS[3], LOAD_BUTTON_IDS[3], 60, 3);
+        updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[0], ChuggingBarrelConstants.POTION_CONTAINER_IDS[0], ChuggingBarrelConstants.LOAD_BUTTON_IDS[0], 0, 0);
+        updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[1], ChuggingBarrelConstants.POTION_CONTAINER_IDS[1], ChuggingBarrelConstants.LOAD_BUTTON_IDS[1], 20, 1);
+        updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[2], ChuggingBarrelConstants.POTION_CONTAINER_IDS[2], ChuggingBarrelConstants.LOAD_BUTTON_IDS[2], 40, 2);
+        updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[3], ChuggingBarrelConstants.POTION_CONTAINER_IDS[3], ChuggingBarrelConstants.LOAD_BUTTON_IDS[3], 60, 3);
         updateScrollbar(true);
+
+        Widget loadButton1 = client.getWidget(ChuggingBarrelConstants.LOAD_BUTTON_IDS[0]);
     }
 
     private void resetChuggingBarrelInterface() {
-        resetLoadout(LOADOUT_CONTAINER_IDS[0], POTION_CONTAINER_IDS[0], LOAD_BUTTON_IDS[0], 0);
-        resetLoadout(LOADOUT_CONTAINER_IDS[1], POTION_CONTAINER_IDS[1], LOAD_BUTTON_IDS[1], 1);
-        resetLoadout(LOADOUT_CONTAINER_IDS[2], POTION_CONTAINER_IDS[2], LOAD_BUTTON_IDS[2], 2);
-        resetLoadout(LOADOUT_CONTAINER_IDS[3], POTION_CONTAINER_IDS[3], LOAD_BUTTON_IDS[3], 3);
+        resetLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[0], ChuggingBarrelConstants.POTION_CONTAINER_IDS[0], ChuggingBarrelConstants.LOAD_BUTTON_IDS[0], 0);
+        resetLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[1], ChuggingBarrelConstants.POTION_CONTAINER_IDS[1], ChuggingBarrelConstants.LOAD_BUTTON_IDS[1], 1);
+        resetLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[2], ChuggingBarrelConstants.POTION_CONTAINER_IDS[2], ChuggingBarrelConstants.LOAD_BUTTON_IDS[2], 2);
+        resetLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[3], ChuggingBarrelConstants.POTION_CONTAINER_IDS[3], ChuggingBarrelConstants.LOAD_BUTTON_IDS[3], 3);
         updateScrollbar(false);
     }
 
@@ -139,7 +163,7 @@ public class ChuggingBarrelPlugin extends Plugin {
         loadoutContainerOriginalHeight[index] = loadoutContainer.getHeight();
 
         loadoutContainer.setOriginalY(loadoutContainer.getOriginalY() + yOffset);
-        loadoutContainer.setOriginalHeight(loadoutContainer.getHeight() + TITLE_WIDGET_HEIGHT);
+        loadoutContainer.setOriginalHeight(loadoutContainer.getHeight() + ChuggingBarrelConstants.TITLE_WIDGET_HEIGHT);
 
         Widget potionsContainer = client.getWidget(potionsContainerId);
         if (potionsContainer != null) {
@@ -150,7 +174,7 @@ public class ChuggingBarrelPlugin extends Plugin {
 
         Widget loadButton = client.getWidget(loadButtonId);
         if (loadButton != null) {
-            loadButton.setOriginalY(loadButton.getRelativeY() + TITLE_WIDGET_HEIGHT);
+            loadButton.setOriginalY(loadButton.getRelativeY() + ChuggingBarrelConstants.TITLE_WIDGET_HEIGHT);
             loadButton.revalidate();
         }
 
@@ -168,7 +192,7 @@ public class ChuggingBarrelPlugin extends Plugin {
         textWidget.setXTextAlignment(WidgetTextAlignment.CENTER);
         textWidget.setTextShadowed(true);
         textWidget.setTextColor(16750623);
-        textWidget.setOriginalHeight(TITLE_WIDGET_HEIGHT);
+        textWidget.setOriginalHeight(ChuggingBarrelConstants.TITLE_WIDGET_HEIGHT);
         textWidget.setOriginalWidth(loadoutContainer.getWidth());
         textWidget.setYTextAlignment(WidgetTextAlignment.CENTER);
         textWidget.setHasListener(true);
@@ -176,7 +200,10 @@ public class ChuggingBarrelPlugin extends Plugin {
         textWidget.setName("loadout name");
         textWidget.setOnOpListener((JavaScriptCallback) event -> {
             String oldLoadoutName = textWidget.getText();
-            chatboxPanelManager.openTextInput("Loadout name: ")
+            chatboxPanelManager.openTextInput(
+                    "Loadout name:<br>" +
+                        "(Only the first " + ChuggingBarrelConstants.OVERLAY_CHAR_LIMIT + " characters will be shown in the overlay)"
+                )
                 .value(Strings.nullToEmpty(oldLoadoutName))
                 .onDone((value) -> {
                     clientThread.invokeLater(() -> {
@@ -195,14 +222,14 @@ public class ChuggingBarrelPlugin extends Plugin {
     }
 
     private void updateScrollbar(boolean isSetup) {
-        Widget scrollContainer = client.getWidget(LOADOUTS_SCROLL_CONTAINER_ID);
-        Widget loadoutContainer = client.getWidget(LOADOUT_CONTAINER_IDS[0]);
+        Widget scrollContainer = client.getWidget(ChuggingBarrelConstants.LOADOUTS_SCROLL_CONTAINER_ID);
+        Widget loadoutContainer = client.getWidget(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[0]);
         if (scrollContainer == null || loadoutContainer == null || loadoutContainer.isHidden()) {
             return;
         }
 
         int y = 2;
-        y += (isSetup ? TITLE_WIDGET_HEIGHT * 4 : 0) + loadoutContainer.getHeight() * 4;
+        y += (isSetup ? ChuggingBarrelConstants.TITLE_WIDGET_HEIGHT * 4 : 0) + loadoutContainer.getHeight() * 4;
         y += 8;
 
         int newHeight = 0;
@@ -214,6 +241,6 @@ public class ChuggingBarrelPlugin extends Plugin {
         scrollContainer.setScrollHeight(y);
         scrollContainer.revalidateScroll();
 
-        client.runScript(ScriptID.UPDATE_SCROLLBAR, LOADOUTS_SCROLLBAR_ID, LOADOUTS_SCROLL_CONTAINER_ID, newHeight);
+        client.runScript(ScriptID.UPDATE_SCROLLBAR, ChuggingBarrelConstants.LOADOUTS_SCROLLBAR_ID, ChuggingBarrelConstants.LOADOUTS_SCROLL_CONTAINER_ID, newHeight);
     }
 }
