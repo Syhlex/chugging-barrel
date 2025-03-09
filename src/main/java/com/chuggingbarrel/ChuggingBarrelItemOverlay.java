@@ -45,7 +45,7 @@ public class ChuggingBarrelItemOverlay extends WidgetItemOverlay {
             int textWidth = fontMetrics.stringWidth(textToRender);
             int xOffset = 4; // Barrel is slightly off center relative to its bounds
             int x = bounds.x + (bounds.width - xOffset - textWidth) / 2;
-            int y = bounds.y + 24;
+            int y = bounds.y + 22;
 
             TextComponent text = new TextComponent();
             text.setText(textToRender);

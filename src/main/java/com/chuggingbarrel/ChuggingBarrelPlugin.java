@@ -1,6 +1,9 @@
 package com.chuggingbarrel;
 
+import com.chuggingbarrel.module.ChuggingBarrelModule;
+import com.chuggingbarrel.module.LifecycleComponentManager;
 import com.google.common.base.Strings;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
@@ -49,6 +52,13 @@ public class ChuggingBarrelPlugin extends Plugin {
     private final int[] loadoutContainerOriginalY = new int[ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS.length];
     private final int[] loadoutContainerOriginalHeight = new int[ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS.length];
 
+    private LifecycleComponentManager lifecycleComponentManager = null;
+
+    @Override
+    public void configure(Binder binder) {
+        binder.install(new ChuggingBarrelModule());
+    }
+
     @Provides
     ChuggingBarrelConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(ChuggingBarrelConfig.class);
@@ -58,12 +68,18 @@ public class ChuggingBarrelPlugin extends Plugin {
     protected void startUp() throws Exception {
         overlayManager.add(chuggingBarrelItemOverlay);
         clientThread.invokeLater(this::setupChuggingBarrelInterface);
+
+        if (lifecycleComponentManager == null) {
+            lifecycleComponentManager = injector.getInstance(LifecycleComponentManager.class);
+        }
+        lifecycleComponentManager.startUp();
     }
 
     @Override
     protected void shutDown() throws Exception {
         overlayManager.remove(chuggingBarrelItemOverlay);
         clientThread.invokeLater(this::resetChuggingBarrelInterface);
+        lifecycleComponentManager.shutDown();
     }
 
     @Subscribe
@@ -110,8 +126,6 @@ public class ChuggingBarrelPlugin extends Plugin {
         updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[2], ChuggingBarrelConstants.POTION_CONTAINER_IDS[2], ChuggingBarrelConstants.LOAD_BUTTON_IDS[2], 40, 2);
         updateLoadout(ChuggingBarrelConstants.LOADOUT_CONTAINER_IDS[3], ChuggingBarrelConstants.POTION_CONTAINER_IDS[3], ChuggingBarrelConstants.LOAD_BUTTON_IDS[3], 60, 3);
         updateScrollbar(true);
-
-        Widget loadButton1 = client.getWidget(ChuggingBarrelConstants.LOAD_BUTTON_IDS[0]);
     }
 
     private void resetChuggingBarrelInterface() {

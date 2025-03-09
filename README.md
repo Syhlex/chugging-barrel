@@ -8,17 +8,22 @@ This plugin brings quality-of-life (QoL) improvements to the Chugging Barrel.
 ## Features
 
 - Adds load-outs names to the barrel interface.
-- Adds an item overlay with the name of the current load-out.
+- Shows the name of the current load-out over the item.
+- Indicates when any potion doses fall below a configured threshold.
 
 ## Usage
 
-Load-outs can be renamed by clicking on their names in the barrel interface.
+- Load-outs can be renamed by clicking on their names in the barrel's bank interface.
+- The name of the load-out selected using the **Load** button is displayed over the Chugging barrel item.
+- Clicking the **Deposit Potions** button clears the selected load-out.
 
-![Demo Gif](./images/demo.webp)
+## Screenshots
 
-The name of the load-out selected using the **Load** button is displayed over the Chugging barrel item.<br>
-Only the first 7 characters are shown due to limited space.<br>
+![Demo Gif](./images/demo.webp)&nbsp;&nbsp;
+![Item Overlay](./images/item-overlay.png)&nbsp;&nbsp;
+![Low Dose Overlay](./images/low-dose-overlay.png)
 
-![Item Overlay](./images/item-overlay.png)
+## Contribute
 
-Clicking the **Deposit Potions** button clears the selected load-out.
+For feature suggestions or bug reports, feel free
+to [open an issue](https://github.com/Syhlex/chugging-barrel/issues/new).
