@@ -1,6 +1,7 @@
-package com.chuggingbarrel;
+package com.chuggingbarrel.features.loadoutnames;
 
-import lombok.extern.slf4j.Slf4j;
+import com.chuggingbarrel.ChuggingBarrelConfig;
+import com.chuggingbarrel.ChuggingBarrelConstants;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
@@ -9,14 +10,13 @@ import net.runelite.client.ui.overlay.components.TextComponent;
 import javax.inject.Inject;
 import java.awt.*;
 
-@Slf4j
-public class ChuggingBarrelItemOverlay extends WidgetItemOverlay {
-    private final ChuggingBarrelPlugin plugin;
+public class LoadoutOverlay extends WidgetItemOverlay {
+    private final LoadoutNames feature;
     private final ChuggingBarrelConfig config;
 
     @Inject
-    ChuggingBarrelItemOverlay(ChuggingBarrelPlugin plugin, ChuggingBarrelConfig config) {
-        this.plugin = plugin;
+    LoadoutOverlay(LoadoutNames feature, ChuggingBarrelConfig config) {
+        this.feature = feature;
         this.config = config;
         showOnInventory();
         showOnBank();
@@ -31,7 +31,7 @@ public class ChuggingBarrelItemOverlay extends WidgetItemOverlay {
         if (itemId == ChuggingBarrelConstants.ITEM_ID) {
             graphics.setFont(FontManager.getRunescapeSmallFont());
             Rectangle bounds = itemWidget.getCanvasBounds();
-            String selectedLoadoutName = plugin.getSelectedLoadoutName();
+            String selectedLoadoutName = feature.getSelectedLoadoutName();
 
             if (selectedLoadoutName == null || selectedLoadoutName.isEmpty()) {
                 return;
