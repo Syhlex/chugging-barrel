@@ -10,6 +10,7 @@ This plugin brings quality-of-life (QoL) improvements to the Chugging Barrel.
 - Adds load-outs names to the barrel interface.
 - Shows the name of the current load-out over the item.
 - Indicates when any potion doses fall below a configured threshold.
+- Reminds you to bank the barrel after drinking.
 
 ## Usage
 
