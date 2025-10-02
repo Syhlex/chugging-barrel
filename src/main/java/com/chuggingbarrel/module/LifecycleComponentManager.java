@@ -1,13 +1,13 @@
 package com.chuggingbarrel.module;
 
 import javax.inject.Inject;
-import java.util.Set;
+import java.util.List;
 
 public class LifecycleComponentManager {
-    private final Set<PluginLifecycleComponent> lifecycleComponents;
+    private final List<PluginLifecycleComponent> lifecycleComponents;
 
     @Inject
-    LifecycleComponentManager(Set<PluginLifecycleComponent> lifecycleComponents) {
+    LifecycleComponentManager(List<PluginLifecycleComponent> lifecycleComponents) {
         this.lifecycleComponents = lifecycleComponents;
     }
 
