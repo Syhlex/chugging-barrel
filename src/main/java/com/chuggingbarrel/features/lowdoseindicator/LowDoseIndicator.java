@@ -79,6 +79,8 @@ public class LowDoseIndicator implements PluginLifecycleComponent {
                 String potionName = currentPotion.getName();
                 int doseCount = currentPotion.getItemQuantity();
                 configStateManager.updatePotionInfo(i, Objects.equals(potionName, "null") ? null : new PotionInfo(potionName, doseCount));
+            } else {
+                configStateManager.updatePotionInfo(i, null);
             }
         }
     }
